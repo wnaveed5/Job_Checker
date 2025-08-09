@@ -161,7 +161,7 @@ sources:
       - mux
       - vanta
   lever:
-    enabled: false
+    enabled: true
     companies:
       - pointclickcare
       - nisum
