@@ -66,7 +66,7 @@ sources:
     enabled: true
   greenhouse:
     enabled: true
-    companies:
+    board_tokens:
       - affirm
       - airbnb
       - airbyte
@@ -161,7 +161,7 @@ sources:
       - mux
       - vanta
   lever:
-    enabled: true
+    enabled: false
     companies:
       - pointclickcare
       - nisum
@@ -180,15 +180,16 @@ sources:
       - deel
       - remote
   wwr:
-    enabled: true
+    enabled: false
     categories:
       - devops-sysadmin
       - engineering
-  remotive:
-    enabled: true
-  linkedin:
-    enabled: true
-    rss_url: "https://www.linkedin.com/jobs/search/?keywords=devops+aws+cloud+sre&location=Austin%2C+Texas+remote&f_JT=F"
+  jobspikr:
+    enabled: false
+    api_key: ""
+  jobdataapi:
+    enabled: false
+    api_key: ""
 telegram:
   tag_austin: '[AUSTIN]'
   tag_us_remote: '[US-REMOTE]'

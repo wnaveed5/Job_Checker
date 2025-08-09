@@ -28,8 +28,8 @@ def gather_jobs(cfg: Config) -> List[Job]:
         jobs.extend(fetch_remotive(cfg.filters.include_keywords))
     # Greenhouse
     if cfg.sources.greenhouse.enabled:
-        companies = cfg.sources.greenhouse.extras.get("companies", [])
-        jobs.extend(list(fetch_greenhouse(companies)))
+        board_tokens = cfg.sources.greenhouse.extras.get("board_tokens", [])
+        jobs.extend(list(fetch_greenhouse(board_tokens)))
     # Lever
     if cfg.sources.lever.enabled:
         companies = cfg.sources.lever.extras.get("companies", [])
