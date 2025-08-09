@@ -22,7 +22,7 @@ app.add_middleware(
 # Mount static files for the React frontend (only if directory exists)
 static_dir = Path(__file__).parent / "static"
 if static_dir.exists():
-    app.mount("/static", StaticFiles(directory="static"), name="static")
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Pydantic models for API responses
 class JobResponse(BaseModel):
