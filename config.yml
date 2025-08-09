@@ -1,0 +1,196 @@
+app:
+  interval_seconds: 120
+  full_time_only: true
+  max_post_age_hours: 48
+  adaptive_recency: true
+  weekday_max_post_age_hours: 24
+  weekend_max_post_age_hours: 72
+filters:
+  include_keywords:
+    - aws
+    - devops
+    - sre
+    - kubernetes
+    - eks
+    - docker
+    - terraform
+    - cicd
+    - argocd
+    - grafana
+    - prometheus
+  include_bonus_keywords:
+    - kafka
+    - nginx
+    - istio
+    - consul
+    - linkerd
+    - datadog
+    - new relic
+    - honeycomb
+    - splunk
+    - elk
+    - elasticsearch
+    - logstash
+    - kibana
+    - opentelemetry
+    - oauth
+    - sso
+    - oidc
+  exclude_text_keywords:
+    - unpaid
+    - volunteer
+    - internship only
+  title_must_include_any:
+    - devops
+    - cloud
+    - sre
+    - platform
+    - infrastructure
+  min_score: 1
+  company_whitelist: []
+  company_blacklist: []
+  exclude_contract: true
+  exclude_intern: true
+  exclude_part_time: true
+  exclude_temp: true
+locations:
+  austin_aliases:
+    - austin
+    - austin, tx
+    - austin, texas
+    - greater austin area
+    - tx - austin
+  us_only_remote: true
+sources:
+  remotive:
+    enabled: true
+  greenhouse:
+    enabled: true
+    companies:
+      - affirm
+      - airbnb
+      - airbyte
+      - airtable
+      - algolia
+      - amplitude
+      - asana
+      - atlassian
+      - benchling
+      - boxinc
+      - canonical
+      - circleci
+      - cloudflare
+      - cloudsmith
+      - cockroachlabs
+      - coinbase
+      - coursera
+      - databricks
+      - datacamp
+      - datadog
+      - discord
+      - doordash
+      - dropbox
+      - elastic
+      - fastly
+      - figma
+      - github
+      - gitlab
+      - gocardless
+      - gusto
+      - hashicorp
+      - heroku
+      - klaviyo
+      - launchdarkly
+      - loom
+      - melio
+      - mondaydotcom
+      - mongodb
+      - netlify
+      - newrelic
+      - notion
+      - okta
+      - pagerduty
+      - planetscale
+      - postman
+      - productboard
+      - quip
+      - reddit
+      - retool
+      - rippling
+      - robinhood
+      - roku
+      - rubrik
+      - sentry
+      - shopmonkey
+      - slack
+      - smartbear
+      - snowflake
+      - snyk
+      - sourcegraph
+      - squareup
+      - stripe
+      - tailscale
+      - triplewhale
+      - truework
+      - twilio
+      - unitytechnologies
+      - vercel
+      - vultr
+      - yugabyte
+      - zapier
+      - zendesk
+      - calendly
+      - chime
+      - grammarly
+      - hackerone
+      - instacart
+      - roblox
+      - niantic
+      - supergiantgames
+      - manticoregames
+      - thatgamecompany
+      - wholefoods
+      - kroger
+      - sprouts
+      - grubhub
+      - toast
+      - ezcater
+      - hellofresh
+      - brex
+      - ramp
+      - mux
+      - vanta
+  lever:
+    enabled: true
+    companies:
+      - pointclickcare
+      - nisum
+      - winncompanies
+      - tollinternational
+      - grindwerk
+      - brex
+      - survios
+      - playableworlds
+      - onemoregaming
+      - gopuff
+      - imperfectfoods
+      - bolt
+      - gusto
+      - clearco
+      - deel
+      - remote
+  wwr:
+    enabled: true
+    categories:
+      - devops-sysadmin
+      - engineering
+  remotive:
+    enabled: true
+  linkedin:
+    enabled: true
+    rss_url: "https://www.linkedin.com/jobs/search/?keywords=devops+aws+cloud+sre&location=Austin%2C+Texas+remote&f_JT=F"
+telegram:
+  tag_austin: '[AUSTIN]'
+  tag_us_remote: '[US-REMOTE]'
+  tag_core: '[CORE]'
+  tag_stretch: '[STRETCH]'

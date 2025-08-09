@@ -1,0 +1,158 @@
+app:
+  interval_seconds: 120
+  full_time_only: true
+  max_post_age_hours: 24
+
+filters:
+  include_keywords:
+    - aws
+    - devops
+    - sre
+    - kubernetes
+    - eks
+    - docker
+    - terraform
+    - cicd
+    - argocd
+    - grafana
+    - prometheus
+  include_bonus_keywords:
+    - kafka
+    - nginx
+    - istio
+    - consul
+    - linkerd
+    - datadog
+    - new relic
+    - honeycomb
+    - splunk
+    - elk
+    - elasticsearch
+    - logstash
+    - kibana
+    - opentelemetry
+    - sso
+    - oidc
+    - staff
+    - senior
+    - principal
+    - lead
+    - oauth
+    - sso
+    - oidc
+    - staff
+  exclude_text_keywords:
+    - unpaid
+    - volunteer
+    - internship only
+  min_score: 2
+  title_must_include_any:
+    - devops
+    - cloud
+    - sre
+    - platform
+    - infrastructure
+  company_whitelist: []
+  company_blacklist: []
+  exclude_contract: true
+  exclude_intern: true
+  exclude_part_time: true
+  exclude_temp: true
+
+locations:
+  # Austin metro and US-remote
+  austin_aliases:
+    - austin
+    - austin, tx
+    - austin, texas
+    - greater austin area
+    - tx - austin
+  # States to consider US-only remote; if location suggests non-US, drop
+  us_only_remote: true
+
+sources:
+  remotive:
+    enabled: true
+  greenhouse:
+    enabled: true
+    companies:  # Greenhouse board tokens (subdomain path after /boards/)
+      - unitytechnologies
+      - cloudflare
+      - datadog
+      - twilio
+      - slack
+      - stripe
+      - snowflake
+      - elastic
+      - okta
+      - github
+      - gitlab
+      - hashicorp
+      - databricks
+      - vercel
+      - fastly
+      - zapier
+      - tailscale
+      - planetscale
+      - netlify
+      - airtable
+      - atlassian
+      - dropbox
+      - doordash
+      - coinbase
+      - rippling
+      - loom
+      - asana
+      - mondaydotcom
+      - squareup
+      - zendesk
+      - heroku
+      - plaid
+      - notion
+      - slack
+      - airbnb
+      - boxinc
+      - cloudflare
+      - cloudsmith
+      - sentry
+      - sourcegraph
+  lever:
+    enabled: true
+    companies:
+      - shopify
+      - netflix
+      - robinhood
+      - discord
+      - notion
+      - reddit
+      - slack
+      - openai
+      - affirm
+      - datadog
+  remoteok:
+    enabled: false
+  wwr:
+    enabled: false
+    categories:
+      - devops-sysadmin
+      - engineering
+  adzuna:
+    enabled: false  # requires APP_ID/APP_KEY in env; will auto-disable if missing
+    country: us
+    location: "Austin, TX"
+  usajobs:
+    enabled: false
+  jobspikr:
+    enabled: false  # set true and provide JOBSPIKR_API_KEY in env
+    location_query: "Austin, TX OR Remote US"
+  jobdataapi:
+    enabled: false  # set true and provide JOBDATAAPI_KEY in env
+    location_query: "Austin, TX OR Remote US"
+
+telegram:
+  tag_austin: "[AUSTIN]"
+  tag_us_remote: "[US-REMOTE]"
+  tag_core: "[CORE]"
+  tag_stretch: "[STRETCH]"
+
+
