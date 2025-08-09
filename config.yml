@@ -18,6 +18,22 @@ filters:
     - argocd
     - grafana
     - prometheus
+    - helm
+    - kustomize
+    - flux
+    - jenkins
+    - github actions
+    - gitlab ci
+    - crossplane
+    - backstage
+    - argo workflows
+    - ec2
+    - s3
+    - rds
+    - lambda
+    - cloudformation
+    - aws cli
+    - boto3
   include_bonus_keywords:
     - kafka
     - nginx
@@ -36,17 +52,43 @@ filters:
     - oauth
     - sso
     - oidc
+    - gcp
+    - azure
+    - google cloud
+    - ansible
+    - python
+    - bash
+    - linux
+    - cloudwatch
+    - ecr
+    - ecs
+    - iam
+    - trivy
+    - sonarqube
+    - codecommit
+    - codebuild
+    - codedeploy
+    - gitops
+    - microservices
+    - auto-scaling
   exclude_text_keywords:
     - unpaid
     - volunteer
     - internship only
+    - must have gcp
+    - azure required
+    - google cloud experience required
+    - azure expert
+    - gcp expert
+    - google cloud architect
+    - azure architect
   title_must_include_any:
     - devops
     - cloud
     - sre
     - platform
     - infrastructure
-  min_score: 1
+  min_score: 2
   company_whitelist: []
   company_blacklist: []
   exclude_contract: true
@@ -60,6 +102,14 @@ locations:
     - austin, texas
     - greater austin area
     - tx - austin
+    - round rock
+    - cedar park
+    - pflugerville
+    - georgetown
+    - leander
+    - lakeway
+    - bee cave
+    - dripping springs
   us_only_remote: true
 sources:
   remotive:
@@ -163,22 +213,20 @@ sources:
   lever:
     enabled: true
     companies:
-      - pointclickcare
-      - nisum
-      - winncompanies
-      - tollinternational
-      - grindwerk
-      - brex
-      - survios
-      - playableworlds
-      - onemoregaming
-      - gopuff
-      - imperfectfoods
-      - bolt
-      - gusto
-      - clearco
-      - deel
-      - remote
+      - lever
+      - figma
+      - linear
+      - vercel
+      - supabase
+      - planet
+      - scale
+      - anthropic
+      - openai
+      - huggingface
+      - replicate
+      - together
+      - alephalpha
+      - cohere
   wwr:
     enabled: false
     categories:
@@ -195,3 +243,4 @@ telegram:
   tag_us_remote: '[US-REMOTE]'
   tag_core: '[CORE]'
   tag_stretch: '[STRETCH]'
+  tag_aws_only: '[AWS-FOCUSED]'
