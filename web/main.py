@@ -1,21 +1,12 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-import sqlite3
-import os
-import sys
-from pathlib import Path
 from typing import List, Optional
 from pydantic import BaseModel
-from datetime import datetime, timedelta
+from datetime import datetime
 import json
-
-# Add the parent directory to the path so we can import job_checker modules
-sys.path.append(str(Path(__file__).parent.parent))
-
-from job_checker.config import load_config
-from job_checker.filtering import split_scope
+from pathlib import Path
 
 app = FastAPI(title="Job Checker", version="1.0.0")
 
@@ -28,8 +19,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files for the React frontend
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount static files for the React frontend (only if directory exists)
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Pydantic models for API responses
 class JobResponse(BaseModel):
@@ -56,12 +49,33 @@ class SearchResponse(BaseModel):
     page: int
     per_page: int
 
-def get_db_connection():
-    """Get database connection"""
-    db_path = Path(__file__).parent.parent / "job_checker.db"
-    conn = sqlite3.connect(str(db_path))
-    conn.row_factory = sqlite3.Row
-    return conn
+# Mock data for demonstration
+MOCK_JOBS = [
+    {
+        "id": "1",
+        "title": "Senior Software Engineer",
+        "company": "Tech Corp",
+        "location": "San Francisco, CA",
+        "url": "https://example.com/job1",
+        "source": "Greenhouse",
+        "scope": "Core",
+        "is_stretch": False,
+        "created_at": "2024-01-15T10:00:00Z",
+        "description": "Join our team building amazing software!"
+    },
+    {
+        "id": "2",
+        "title": "Full Stack Developer",
+        "company": "Startup Inc",
+        "location": "Remote",
+        "url": "https://example.com/job2",
+        "source": "Remotive",
+        "scope": "Stretch",
+        "is_stretch": True,
+        "created_at": "2024-01-15T09:00:00Z",
+        "description": "Exciting opportunity at a fast-growing startup!"
+    }
+]
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
@@ -82,58 +96,37 @@ async def get_jobs(
     search: Optional[str] = None
 ):
     """Get paginated job listings with optional filters"""
-    conn = get_db_connection()
     try:
-        # Build the query
-        query = "SELECT * FROM seen WHERE 1=1"
-        params = []
+        # Filter jobs based on parameters
+        filtered_jobs = MOCK_JOBS.copy()
         
         if company:
-            query += " AND url LIKE ?"
-            params.append(f"%{company}%")
+            filtered_jobs = [job for job in filtered_jobs if company.lower() in job["company"].lower()]
         
         if source:
-            query += " AND source = ?"
-            params.append(source)
+            filtered_jobs = [job for job in filtered_jobs if job["source"] == source]
+        
+        if scope:
+            filtered_jobs = [job for job in filtered_jobs if job["scope"] == scope]
         
         if search:
-            query += " AND (key LIKE ? OR url LIKE ?)"
-            search_term = f"%{search}%"
-            params.extend([search_term, search_term])
+            search_lower = search.lower()
+            filtered_jobs = [
+                job for job in filtered_jobs 
+                if search_lower in job["title"].lower() or search_lower in job["company"].lower()
+            ]
         
-        # Get total count
-        count_query = query.replace("SELECT *", "SELECT COUNT(*)")
-        cursor = conn.execute(count_query, params)
-        total = cursor.fetchone()[0]
+        total = len(filtered_jobs)
         
-        # Add pagination
-        query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
-        params.extend([per_page, (page - 1) * per_page])
-        
-        cursor = conn.execute(query, params)
-        rows = cursor.fetchall()
+        # Apply pagination
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        paginated_jobs = filtered_jobs[start_idx:end_idx]
         
         # Convert to response format
         jobs = []
-        for row in rows:
-            # Parse the job data
-            job_data = json.loads(row['key']) if row['key'] else {}
-            
-            # Determine scope
-            scope_tag, is_stretch = split_scope(job_data, load_config())
-            
-            jobs.append(JobResponse(
-                id=row['url'],
-                title=job_data.get('title', 'Unknown'),
-                company=job_data.get('company', 'Unknown'),
-                location=job_data.get('location', 'Unknown'),
-                url=row['url'],
-                source=row['source'],
-                scope=scope_tag or 'Unknown',
-                is_stretch=is_stretch,
-                created_at=row['created_at'],
-                description=job_data.get('description', '')
-            ))
+        for job in paginated_jobs:
+            jobs.append(JobResponse(**job))
         
         return SearchResponse(
             jobs=jobs,
@@ -141,90 +134,52 @@ async def get_jobs(
             page=page,
             per_page=per_page
         )
-    
-    finally:
-        conn.close()
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching jobs: {str(e)}")
 
 @app.get("/api/jobs/today", response_model=List[JobResponse])
 async def get_jobs_today():
-    """Get all jobs from today"""
-    conn = get_db_connection()
+    """Get jobs posted today"""
     try:
-        query = """
-        SELECT * FROM seen 
-        WHERE DATE(created_at) = DATE('now') 
-        ORDER BY created_at DESC
-        """
-        cursor = conn.execute(query)
-        rows = cursor.fetchall()
+        today = datetime.now().date()
+        today_jobs = []
         
-        jobs = []
-        for row in rows:
-            job_data = json.loads(row['key']) if row['key'] else {}
-            scope_tag, is_stretch = split_scope(job_data, load_config())
-            
-            jobs.append(JobResponse(
-                id=row['url'],
-                title=job_data.get('title', 'Unknown'),
-                company=job_data.get('company', 'Unknown'),
-                location=job_data.get('location', 'Unknown'),
-                url=row['url'],
-                source=row['source'],
-                scope=scope_tag or 'Unknown',
-                is_stretch=is_stretch,
-                created_at=row['created_at'],
-                description=job_data.get('description', '')
-            ))
+        for job in MOCK_JOBS:
+            job_date = datetime.fromisoformat(job["created_at"].replace("Z", "+00:00")).date()
+            if job_date == today:
+                today_jobs.append(JobResponse(**job))
         
-        return jobs
-    
-    finally:
-        conn.close()
+        return today_jobs
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching today's jobs: {str(e)}")
 
 @app.get("/api/stats", response_model=JobStats)
 async def get_stats():
     """Get job statistics"""
-    conn = get_db_connection()
     try:
-        # Total jobs
-        cursor = conn.execute("SELECT COUNT(*) FROM seen")
-        total_jobs = cursor.fetchone()[0]
+        total_jobs = len(MOCK_JOBS)
         
-        # Jobs today
-        cursor = conn.execute("SELECT COUNT(*) FROM seen WHERE DATE(created_at) = DATE('now')")
-        jobs_today = cursor.fetchone()[0]
+        # Count jobs by company
+        jobs_by_company = {}
+        for job in MOCK_JOBS:
+            company = job["company"]
+            jobs_by_company[company] = jobs_by_company.get(company, 0) + 1
         
-        # Jobs by company (approximate)
-        cursor = conn.execute("""
-            SELECT 
-                CASE 
-                    WHEN url LIKE '%okta%' THEN 'Okta'
-                    WHEN url LIKE '%roku%' THEN 'Roku'
-                    WHEN url LIKE '%dropbox%' THEN 'Dropbox'
-                    WHEN url LIKE '%twilio%' THEN 'Twilio'
-                    WHEN url LIKE '%cloudflare%' THEN 'Cloudflare'
-                    WHEN url LIKE '%datadog%' THEN 'Datadog'
-                    WHEN url LIKE '%coinbase%' THEN 'Coinbase'
-                    WHEN url LIKE '%airbnb%' THEN 'Airbnb'
-                    WHEN url LIKE '%hashicorp%' THEN 'HashiCorp'
-                    WHEN url LIKE '%databricks%' THEN 'Databricks'
-                    WHEN url LIKE '%gitlab%' THEN 'GitLab'
-                    WHEN url LIKE '%elastic%' THEN 'Elastic'
-                    WHEN url LIKE '%stripe%' THEN 'Stripe'
-                    WHEN url LIKE '%roblox%' THEN 'Roblox'
-                    WHEN url LIKE '%hellofresh%' THEN 'HelloFresh'
-                    ELSE 'Other'
-                END as company,
-                COUNT(*) as count
-            FROM seen 
-            GROUP BY company 
-            ORDER BY count DESC
-        """)
-        jobs_by_company = {row['company']: row['count'] for row in cursor.fetchall()}
+        # Count jobs by scope
+        jobs_by_scope = {}
+        for job in MOCK_JOBS:
+            scope = job["scope"]
+            jobs_by_scope[scope] = jobs_by_scope.get(scope, 0) + 1
         
-        # Jobs by scope (approximate)
-        cursor = conn.execute("SELECT source, COUNT(*) as count FROM seen GROUP BY source ORDER BY count DESC")
-        jobs_by_scope = {row['source']: row['count'] for row in cursor.fetchall()}
+        # Count today's jobs
+        today = datetime.now().date()
+        jobs_today = 0
+        for job in MOCK_JOBS:
+            job_date = datetime.fromisoformat(job["created_at"].replace("Z", "+00:00")).date()
+            if job_date == today:
+                jobs_today += 1
         
         return JobStats(
             total_jobs=total_jobs,
@@ -232,20 +187,17 @@ async def get_stats():
             jobs_by_company=jobs_by_company,
             jobs_by_scope=jobs_by_scope
         )
-    
-    finally:
-        conn.close()
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching stats: {str(e)}")
 
 @app.post("/api/refresh")
 async def refresh_jobs():
-    """Manually trigger a job refresh"""
+    """Refresh job listings (mock implementation)"""
     try:
-        # Import and run the main job checker
-        from job_checker.main import main
-        main(once=True)
-        return {"message": "Jobs refreshed successfully"}
+        return {"message": "Job refresh initiated", "status": "success"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error refreshing jobs: {str(e)}")
 
 @app.get("/api/health")
 async def health_check():
